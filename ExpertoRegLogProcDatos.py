@@ -1,6 +1,6 @@
 import time
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-from RegLog.modelo import modelo_is_downloaded
+from RegLog.modelo import modelo_reglog
 from RegLog.reglas import (
     regla_transformacion_caracteristicas,
     regla_normalizacion_datos,
@@ -16,12 +16,12 @@ import numpy as np
 import os
 
 # Configuración inicial
-data_path = "dataset/train/stroke.csv"
-num_atributos = 11
-nombre_variable_objetivo = 'stroke'
+data_path = "dataset/train/diabetes_prediction_dataset.csv"
+num_atributos = 8
+nombre_variable_objetivo = 'diabetes'
 columnas_a_ignorar = []
 ruta_salida = "dataset/processed/data"
-ruta_resultados = "resultados/pruebaStroke/"
+ruta_resultados = "resultados/pruebaDiabetesRegLog/"
 
 if not os.path.exists(ruta_resultados):
     os.makedirs(ruta_resultados)
@@ -73,9 +73,9 @@ def refinar_hiperparametros(X_train, X_test, y_train, y_test, mejor_C, mejor_pen
                 print(f"\nRefinando: C={c}, Iteraciones={iteraciones}")
 
                 inicio_modelo = time.time()
-                model, _, _, _, _ = modelo_is_downloaded(X_train, X_test, y_train, y_test,
-                                                         c=c, pen=mejor_penalty, solv=mejor_solver,
-                                                         iteraciones=iteraciones)
+                model, _, _, _, _ = modelo_reglog(X_train, X_test, y_train, y_test,
+                                                  c=c, pen=mejor_penalty, solv=mejor_solver,
+                                                  iteraciones=iteraciones)
                 y_pred = model.predict(X_test)
                 accuracy = accuracy_score(y_test, y_pred)
                 precision = precision_score(y_test, y_pred)
@@ -117,9 +117,9 @@ def aplicar_reglas_y_entrenar_modelos(X_train, X_test, y_train, y_test, hyperpar
         # Asegurarnos de que no hay NaNs
         X_train_imputed, X_test_imputed = imputar_valores_faltantes(X_train, X_test)
 
-        model, _, _, _, _ = modelo_is_downloaded(X_train_imputed, X_test_imputed, y_train, y_test,
-                                                 c=params['c'], pen=params['pen'],
-                                                 solv=params['solv'], iteraciones=params['iteraciones'])
+        model, _, _, _, _ = modelo_reglog(X_train_imputed, X_test_imputed, y_train, y_test,
+                                          c=params['c'], pen=params['pen'],
+                                          solv=params['solv'], iteraciones=params['iteraciones'])
         y_pred = model.predict(X_test_imputed)
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)
@@ -163,9 +163,9 @@ def aplicar_reglas_y_entrenar_modelos(X_train, X_test, y_train, y_test, hyperpar
 
                 # Re-evaluar con el mejor conjunto de hiperparámetros encontrado
                 inicio_modelo = time.time()
-                model, _, _, _, _ = modelo_is_downloaded(X_train_imputed, X_test_imputed, y_train_modificado, y_test,
-                                                         c=mejor_C, pen=mejor_penalty, solv=mejor_solver,
-                                                         iteraciones=5000)
+                model, _, _, _, _ = modelo_reglog(X_train_imputed, X_test_imputed, y_train_modificado, y_test,
+                                                  c=mejor_C, pen=mejor_penalty, solv=mejor_solver,
+                                                  iteraciones=5000)
                 y_pred = model.predict(X_test_imputed)
                 accuracy = accuracy_score(y_test, y_pred)
                 precision = precision_score(y_test, y_pred)
@@ -202,9 +202,9 @@ def aplicar_reglas_y_entrenar_modelos(X_train, X_test, y_train, y_test, hyperpar
                 # Imputar valores faltantes nuevamente
                 X_train_imputed, X_test_imputed = imputar_valores_faltantes(X_train_modificado, X_test_modificado)
 
-                model, _, _, _, _ = modelo_is_downloaded(X_train_imputed, X_test_imputed, y_train_modificado, y_test,
-                                                         c=params['c'], pen=params['pen'], solv=params['solv'],
-                                                         iteraciones=5000)
+                model, _, _, _, _ = modelo_reglog(X_train_imputed, X_test_imputed, y_train_modificado, y_test,
+                                                  c=params['c'], pen=params['pen'], solv=params['solv'],
+                                                  iteraciones=5000)
                 y_pred = model.predict(X_test_imputed)
                 accuracy = accuracy_score(y_test, y_pred)
                 precision = precision_score(y_test, y_pred)

@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 import os
 import pandas as pd
-from .modelo import modelo_is_downloaded  # Ajuste aquí
+from .modelo import modelo_reglog  # Ajuste aquí
 
 def guardar_resultados(resultados, filepath):
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -51,7 +51,7 @@ def RegLogExecutioner(c, pen, sol, iter, datos, printer, mod, variables_corr=Non
     if mod == 2:
         (model,
          precision_train, recall_train, f1_train, accuracy_train,
-         precision_test, recall_test, f1_test, accuracy_test, variables_corr, variables_var) = modelo_is_downloaded(**params)
+         precision_test, recall_test, f1_test, accuracy_test, variables_corr, variables_var) = modelo_reglog(**params)
 
     # Captura de la hora y fecha actual
     fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -3,7 +3,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 
-def modelo_is_downloaded(X_train, X_test, y_train, y_test, c, pen, solv, iteraciones):
+def modelo_reglog(X_train, X_test, y_train, y_test, c, pen, solv, iteraciones):
     model = LogisticRegression(C=c, penalty=pen, solver=solv, max_iter=iteraciones)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -19,7 +19,7 @@ def aplicar_reglas_y_entrenar_modelos(X_train, X_test, y_train, y_test, hyperpar
     results = []
     for params in hyperparameters:
         print(f"\nEvaluando hiperparámetros: C={params['c']}, Penalty={params['pen']}, Solver={params['solv']}, Iteraciones={params['iteraciones']}")
-        model, precision, recall, f1, accuracy = modelo_is_downloaded(X_train, X_test, y_train, y_test, params['c'], params['pen'], params['solv'], params['iteraciones'])
+        model, precision, recall, f1, accuracy = modelo_reglog(X_train, X_test, y_train, y_test, params['c'], params['pen'], params['solv'], params['iteraciones'])
         results.append((model, precision, recall, f1, accuracy))
     return results
 
