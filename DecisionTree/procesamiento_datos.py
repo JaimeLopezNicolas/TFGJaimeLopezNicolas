@@ -6,29 +6,33 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 
+# funcion que detecta y ajusta el delimitador en el dataset
 def detectar_y_cambiar_delimitador(data_path):
     try:
         data = pd.read_csv(data_path)
         print("Archivo cargado correctamente con delimitador de comas.")
         return data
     except pd.errors.ParserError:
+        # si hay error, intenta con otro delimitador
         print("Error de delimitación detectado, intentando con delimitador de punto y coma...")
         data = pd.read_csv(data_path, delimiter=';')
         print("Archivo cargado correctamente con delimitador de punto y coma.")
         return data
 
 
+# selecciona y preprocesa las caracteristicas de los datos
 def seleccionar_y_preprocesar_caracteristicas(data, num_atributos, nombre_variable_objetivo, columnas_a_ignorar):
+    # selecciona las columnas de features
     features = [col for col in data.columns if col != nombre_variable_objetivo and col not in columnas_a_ignorar][
                :num_atributos]
     y = data[nombre_variable_objetivo]
     X = data[features]
 
-    # Distinguir entre variables numéricas y categóricas
+    # separa features numericos y categoricos
     numeric_features = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_features = X.select_dtypes(include=['object']).columns.tolist()
 
-    # Crear transformadores por tipo de datos
+    # preprocesa columnas numericas y categoricas
     numeric_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='mean')),
         ('scaler', StandardScaler())])
@@ -42,25 +46,23 @@ def seleccionar_y_preprocesar_caracteristicas(data, num_atributos, nombre_variab
             ('num', numeric_transformer, numeric_features),
             ('cat', categorical_transformer, categorical_features)])
 
-    # Aplicar transformaciones
+    # aplica las transformaciones a los datos
     X_processed = preprocessor.fit_transform(X)
 
-    # Depuración: Imprimir las formas de las salidas
+    # si los datos no son dataframe, convierte a dataframe
     print("Forma de X_processed:", X_processed.shape)
     if isinstance(X_processed, pd.DataFrame):
         X_processed_df = X_processed
     else:
-        # Obtener los nombres de las características
         cat_feature_names = preprocessor.named_transformers_['cat']['onehot'].get_feature_names_out(
             categorical_features)
         all_feature_names = numeric_features + list(cat_feature_names)
         print("Número de características numéricas:", len(numeric_features))
         print("Número de características categóricas (one-hot):", len(cat_feature_names))
         print("Número total de características:", len(all_feature_names))
-
-        # Asegurarse de que X_processed se convierte en DataFrame con las columnas correctas
         X_processed_df = pd.DataFrame(X_processed, columns=all_feature_names)
 
+    # divide los datos en entrenamiento y test
     X_train, X_test, y_train, y_test = train_test_split(X_processed_df, y, test_size=0.2, random_state=42)
 
     # Verificar la cantidad de columnas generadas y la cantidad de nombres
@@ -70,6 +72,7 @@ def seleccionar_y_preprocesar_caracteristicas(data, num_atributos, nombre_variab
     return X_train, X_test, y_train, y_test, X_processed_df.columns.tolist(), preprocessor
 
 
+# guarda los datos preprocesados en CSV
 def guardar_datos_procesados(X_train, X_test, y_train, y_test, ruta_salida, column_names):
     # Convertir matrices a DataFrames
     if X_train.shape[1] != len(column_names):
@@ -87,6 +90,7 @@ def guardar_datos_procesados(X_train, X_test, y_train, y_test, ruta_salida, colu
     print("Datos procesados guardados correctamente.")
 
 
+# funcion principal para procesamiento de datos
 def procesamiento_integral(data_path, num_atributos, nombre_variable_objetivo, columnas_a_ignorar, ruta_salida):
     data = detectar_y_cambiar_delimitador(data_path)
     X_train, X_test, y_train, y_test, features, preprocessor = seleccionar_y_preprocesar_caracteristicas(data,
